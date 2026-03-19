@@ -239,24 +239,34 @@ function ProbeTerminal() {
   }, [inView, started]);
 
   return (
-    <div ref={ref} className="bg-[#07070e] border border-white/[0.07] overflow-hidden">
-      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.05] bg-[#0a0a14]">
-        <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-        <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-        <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-        <span className="ml-3 font-mono text-[11px] text-white/30 tracking-wide">forge probe — bash</span>
-        <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="font-mono text-[10px] text-white/25">live</span>
+    <div ref={ref} className="relative">
+      {/* Glow behind probe terminal */}
+      <div
+        className="absolute -inset-6 opacity-30 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(0,212,255,0.08), transparent 70%)", filter: "blur(20px)" }}
+      />
+      <div
+        className="relative bg-[#07070e] border border-white/[0.08] overflow-hidden rounded-xl"
+        style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+      >
+        <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.05]" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent)" }}>
+          <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]/80" />
+          <span className="ml-3 font-mono text-[11px] text-white/25 tracking-wide">forge probe — production monitor</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="font-mono text-[10px] text-green-400/50 tracking-widest uppercase">live</span>
+          </div>
         </div>
-      </div>
-      <div className="p-6 min-h-[380px]">
-        {PROBE_LINES.slice(0, visibleCount).map((line, i) => (
-          <ProbeLine key={i} line={line} />
-        ))}
-        {visibleCount < PROBE_LINES.length && (
-          <span className="inline-block w-2 h-3.5 bg-[#00D4FF] animate-pulse ml-0.5" />
-        )}
+        <div className="p-6 min-h-[380px]">
+          {PROBE_LINES.slice(0, visibleCount).map((line, i) => (
+            <ProbeLine key={i} line={line} />
+          ))}
+          {visibleCount < PROBE_LINES.length && (
+            <span className="inline-block w-2 h-3.5 bg-[#00D4FF] animate-pulse ml-0.5" />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -264,8 +274,19 @@ function ProbeTerminal() {
 
 function ProductionLoopSection() {
   return (
-    <section className="border-t border-white/[0.04] py-40 bg-[#050508]">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="border-t border-white/[0.04] py-40 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #06060f 0%, #090916 50%, #06060f 100%)" }}>
+      {/* Section orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="absolute top-1/2 left-[-10%] -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(ellipse, #7C3AED, transparent 70%)", filter: "blur(80px)" }}
+        />
+        <div
+          className="absolute top-1/2 right-[-5%] -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(ellipse, #00D4FF, transparent 70%)", filter: "blur(80px)" }}
+        />
+      </div>
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -348,7 +369,17 @@ const fadeUp = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#080810] text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#06060f] text-white font-sans overflow-x-hidden">
+      {/* Noise texture overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[999] opacity-[0.028]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "128px 128px",
+        }}
+      />
+
       <Navbar />
 
       <main>
@@ -357,42 +388,64 @@ export default function Home() {
           id="hero"
           className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 overflow-hidden"
         >
+          {/* Gradient orbs */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full opacity-[0.07]"
+              style={{ background: "radial-gradient(ellipse, #00D4FF, transparent 70%)", filter: "blur(60px)" }}
+            />
+            <div
+              className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.05]"
+              style={{ background: "radial-gradient(ellipse, #7C3AED, transparent 70%)", filter: "blur(80px)" }}
+            />
+            <div
+              className="absolute bottom-[10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-[0.04]"
+              style={{ background: "radial-gradient(ellipse, #0EA5E9, transparent 70%)", filter: "blur(80px)" }}
+            />
+          </div>
+
           {/* Dot grid */}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 opacity-40"
             style={{
-              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
-              backgroundSize: "32px 32px",
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
             }}
           />
-          {/* Bottom fade */}
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#080810] to-transparent" />
+          {/* Edge fades */}
+          <div className="pointer-events-none absolute inset-0"
+            style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, #06060f 100%)" }}
+          />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#06060f] to-transparent" />
 
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="relative z-10 mb-10 inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.1] text-white/50 text-xs font-mono tracking-widest uppercase"
+            transition={{ duration: 0.5 }}
+            className="relative z-10 mb-10 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-white/40 text-[11px] font-mono tracking-widest uppercase backdrop-blur-sm"
           >
-            Open Source &nbsp;·&nbsp; MIT &nbsp;·&nbsp; TypeScript
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            v0.1.0 — Open Source · MIT · TypeScript
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 text-[clamp(3.5rem,10vw,8rem)] font-black tracking-[-0.04em] leading-[1.0] mb-8 max-w-5xl"
+            transition={{ duration: 0.8, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 text-[clamp(3.2rem,9.5vw,7.5rem)] font-black tracking-[-0.04em] leading-[1.0] mb-8 max-w-5xl"
           >
             One engineer.
             <br />
-            <span className="text-[#00D4FF]">The output</span> of ten.
+            <span className="gradient-text">The output</span>
+            {" "}of ten.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 text-lg sm:text-xl text-white/50 max-w-2xl leading-relaxed font-light mb-12"
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 text-lg sm:text-[1.2rem] text-white/40 max-w-xl leading-[1.7] font-light mb-12"
           >
             Forge turns a plain-English spec into a verified, tested codebase — automatically.
             Intent parsing, agent orchestration, and built-in verification in a single TypeScript framework.
@@ -401,41 +454,59 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="relative z-10 flex flex-col sm:flex-row items-center gap-4"
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="relative z-10 flex flex-col sm:flex-row items-center gap-3"
           >
             <a
               href="https://github.com/w1123581321345589/forge-replit"
               target="_blank"
               rel="noopener noreferrer"
-              className="group bg-[#00D4FF] text-[#080810] px-8 py-3.5 font-bold text-sm tracking-wide hover:bg-white transition-all duration-200 flex items-center gap-2"
+              className="group relative bg-[#00D4FF] text-[#06060f] px-8 py-3.5 font-bold text-sm rounded-md tracking-wide transition-all duration-300 flex items-center gap-2 glow-cyan glow-cyan-hover hover:bg-white"
             >
               View on GitHub
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
             </a>
             <a
               href="#quickstart"
-              className="px-8 py-3.5 font-medium text-sm text-white/50 hover:text-white transition-colors border border-white/[0.08] hover:border-white/20"
+              className="px-8 py-3.5 font-medium text-sm text-white/40 hover:text-white/80 transition-all duration-200 border border-white/[0.07] hover:border-white/[0.15] rounded-md bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm"
             >
               Quick start
             </a>
           </motion.div>
+
+          {/* Scroll hint */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: 0.8 }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+          >
+            <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-pulse" />
+          </motion.div>
         </section>
 
         {/* ─── TERMINAL ─────────────────────────────────── */}
-        <section id="pipeline" className="max-w-5xl mx-auto px-6 pb-40 -mt-8">
+        <section id="pipeline" className="max-w-5xl mx-auto px-6 pb-40 -mt-4">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
           >
-            <AnimatedTerminal />
+            {/* Glow behind terminal */}
+            <div
+              className="absolute -inset-8 rounded-3xl opacity-[0.35] pointer-events-none"
+              style={{ background: "radial-gradient(ellipse at 50% 80%, rgba(0,212,255,0.08), transparent 70%)", filter: "blur(20px)" }}
+            />
+            <div className="relative shadow-[0_32px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)]">
+              <AnimatedTerminal />
+            </div>
           </motion.div>
         </section>
 
         {/* ─── STATS ────────────────────────────────────── */}
-        <section className="border-y border-white/[0.04] bg-[#050508]">
+        <section className="border-y border-white/[0.04]" style={{ background: "linear-gradient(180deg, #06060f 0%, #080814 50%, #06060f 100%)" }}>
           <motion.div
             variants={stagger}
             initial="hidden"
@@ -444,16 +515,19 @@ export default function Home() {
             className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/[0.04]"
           >
             {[
-              { value: 341, suffix: "", label: "lines from spec to shipping" },
-              { value: 4, suffix: " min", label: "average pipeline run" },
-              { value: 187, suffix: "", label: "tests across 11 packages" },
-              { value: 0, suffix: "", label: "production failures in CI" },
+              { value: 341, suffix: "", label: "Lines from spec to shipping" },
+              { value: 4, suffix: " min", label: "Average pipeline runtime" },
+              { value: 187, suffix: "", label: "Tests across 11 packages" },
+              { value: 0, suffix: "", label: "Production failures in CI" },
             ].map((stat, i) => (
-              <motion.div variants={fadeUp} key={i} className="flex flex-col px-8 py-8 first:pl-0">
-                <span className="text-4xl lg:text-5xl font-black text-[#00D4FF] tracking-tighter tabular-nums mb-1.5">
+              <motion.div variants={fadeUp} key={i} className="flex flex-col px-8 py-10 first:pl-0 group">
+                <span
+                  className="text-4xl lg:text-[3.2rem] font-black tracking-tighter tabular-nums mb-2 transition-all duration-300"
+                  style={{ background: "linear-gradient(135deg, #00D4FF 0%, #60c8ff 60%, #818cf8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+                >
                   <CountUp to={stat.value} suffix={stat.suffix} />
                 </span>
-                <span className="text-xs text-white/40 tracking-wide font-mono uppercase leading-relaxed">
+                <span className="text-[11px] text-white/35 tracking-widest font-mono uppercase leading-relaxed">
                   {stat.label}
                 </span>
               </motion.div>
@@ -483,18 +557,21 @@ export default function Home() {
               </motion.p>
             </div>
 
-            <motion.div variants={fadeUp} className="space-y-3">
+            <motion.div variants={fadeUp} className="space-y-2">
               {[
-                { label: "Install", code: "npm install -g @forge/cli" },
-                { label: "Scaffold", code: "forge init my-project" },
-                { label: "Compile", code: "forge compile spec.md" },
-                { label: "Ship", code: "forge run && forge verify" },
-              ].map(({ label, code }) => (
-                <div key={label} className="flex items-center gap-4 bg-[#07070e] border border-white/[0.06] px-5 py-3.5 group hover:border-white/[0.12] transition-colors">
-                  <span className="font-mono text-[10px] text-white/25 uppercase tracking-widest w-14 shrink-0">
-                    {label}
-                  </span>
-                  <code className="font-mono text-sm text-white/80 flex-1 select-all">{code}</code>
+                { label: "Install", code: "npm install -g @forge/cli", n: "01" },
+                { label: "Scaffold", code: "forge init my-project", n: "02" },
+                { label: "Compile", code: "forge compile spec.md", n: "03" },
+                { label: "Ship", code: "forge run && forge verify", n: "04" },
+              ].map(({ label, code, n }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-4 bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.035] px-5 py-3.5 rounded-lg group transition-all duration-200"
+                  style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}
+                >
+                  <span className="font-mono text-[10px] text-white/20 uppercase tracking-widest w-6 shrink-0">{n}</span>
+                  <span className="font-mono text-[10px] text-[#00D4FF]/50 uppercase tracking-widest w-14 shrink-0">{label}</span>
+                  <code className="font-mono text-[13px] text-white/75 flex-1 select-all group-hover:text-white/90 transition-colors">{code}</code>
                   <CopyButton text={code} />
                 </div>
               ))}
@@ -503,7 +580,7 @@ export default function Home() {
         </section>
 
         {/* ─── FROM IDEA TO PR ──────────────────────────── */}
-        <section id="architecture" className="border-t border-white/[0.04] py-40 bg-[#050508]">
+        <section id="architecture" className="border-t border-white/[0.04] py-40" style={{ background: "linear-gradient(180deg, #06060f 0%, #08081a 50%, #06060f 100%)" }}>
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
               variants={stagger}
@@ -511,16 +588,19 @@ export default function Home() {
               whileInView="show"
               viewport={{ once: true }}
             >
-              <motion.p variants={fadeUp} className="font-mono text-xs text-[#00D4FF] tracking-widest uppercase mb-6">
+              <motion.p variants={fadeUp} className="font-mono text-[11px] text-[#00D4FF]/70 tracking-[0.2em] uppercase mb-5">
                 Architecture
               </motion.p>
-              <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-24 leading-tight max-w-xl">
+              <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-[-0.04em] mb-24 leading-[1.1] max-w-xl">
                 From idea<br />to verified PR.
               </motion.h2>
 
               <div className="relative grid grid-cols-1 lg:grid-cols-5 gap-0">
-                {/* Connector line desktop */}
-                <div className="absolute top-[22px] left-0 right-0 h-px bg-white/[0.05] hidden lg:block" />
+                {/* Connector line desktop — gradient */}
+                <div
+                  className="absolute top-[21px] left-0 right-0 h-px hidden lg:block"
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.15) 20%, rgba(0,212,255,0.15) 80%, transparent)" }}
+                />
 
                 {[
                   { n: "01", title: "Write a spec", body: "Plain English or YAML. Describe what to build, not how." },
@@ -532,16 +612,16 @@ export default function Home() {
                   <motion.div
                     variants={fadeUp}
                     key={s.n}
-                    className="relative lg:pr-8 pt-12 lg:pt-0"
+                    className="relative lg:pr-8 pt-12 lg:pt-0 group"
                   >
-                    <div className="w-11 h-11 bg-[#050508] border border-white/[0.08] flex items-center justify-center font-mono text-[#00D4FF] text-sm font-bold mb-8 relative z-10">
+                    <div
+                      className="w-[42px] h-[42px] flex items-center justify-center font-mono text-[#00D4FF] text-sm font-bold mb-8 relative z-10 rounded-md border border-[#00D4FF]/20 bg-[#00D4FF]/[0.04] group-hover:border-[#00D4FF]/40 group-hover:bg-[#00D4FF]/[0.08] transition-all duration-300"
+                      style={{ boxShadow: "0 0 20px rgba(0,212,255,0.05)" }}
+                    >
                       {s.n}
                     </div>
-                    <h3 className="text-base font-bold mb-3 text-white">{s.title}</h3>
-                    <p className="text-sm text-white/40 leading-relaxed font-light">{s.body}</p>
-                    {i < 4 && (
-                      <div className="absolute right-0 top-[22px] w-px h-full bg-white/[0.04] hidden lg:block" />
-                    )}
+                    <h3 className="text-[15px] font-semibold mb-3 text-white/90 tracking-tight">{s.title}</h3>
+                    <p className="text-sm text-white/35 leading-relaxed font-light">{s.body}</p>
                   </motion.div>
                 ))}
               </div>
@@ -556,21 +636,31 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="border-l-2 border-[#00D4FF] pl-10 lg:pl-16"
+            className="relative rounded-2xl border border-white/[0.06] p-10 lg:p-16 overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(0,212,255,0.03) 0%, rgba(124,58,237,0.02) 50%, transparent 100%)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 40px 80px rgba(0,0,0,0.3)"
+            }}
           >
-            <p className="text-2xl lg:text-4xl font-light italic leading-snug text-white/90 mb-10">
+            {/* gradient accent left border */}
+            <div className="absolute left-0 top-8 bottom-8 w-[2px] rounded-full" style={{ background: "linear-gradient(180deg, transparent, #00D4FF 30%, #818cf8 70%, transparent)" }} />
+            {/* large quote mark */}
+            <div className="absolute top-6 left-14 text-[120px] leading-none font-black text-[#00D4FF]/[0.06] select-none pointer-events-none">"</div>
+
+            <p className="relative text-2xl lg:text-[2rem] font-light italic leading-[1.5] text-white/85 mb-10 max-w-3xl">
               "I compiled a 3-page auth spec. Four minutes later, Forge had written
               341 lines of production TypeScript, all tests green, ready to merge.
               I didn't touch the keyboard."
             </p>
-            <div className="font-mono text-sm text-white/40 tracking-wide">
-              — Will Rose, creator of Forge
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-px bg-[#00D4FF]/30" />
+              <span className="font-mono text-sm text-white/35 tracking-wide">Will Rose — creator of Forge</span>
             </div>
           </motion.div>
         </section>
 
         {/* ─── PACKAGES ─────────────────────────────────── */}
-        <section id="packages" className="border-t border-white/[0.04] py-40 bg-[#050508]">
+        <section id="packages" className="border-t border-white/[0.04] py-40" style={{ background: "linear-gradient(180deg, #06060f 0%, #07071a 60%, #06060f 100%)" }}>
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
               variants={stagger}
@@ -588,27 +678,32 @@ export default function Home() {
                 Each package is a specialist. Together, they replace a workflow that used to take a team of five.
               </motion.p>
 
-              <div className="border-t border-white/[0.06]">
+              <div className="border-t border-white/[0.05]">
                 {[
-                  { name: "@forge/spec-compiler", role: "Understands what you want to build", desc: "Parses plain-English specs into structured, executable intent graphs." },
-                  { name: "@forge/intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG." },
-                  { name: "@forge/agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner and AgentScheduler." },
-                  { name: "@forge/verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified." },
-                  { name: "@forge/probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes. Every 5 minutes. 3 failures cascade the graph. Specs become living SLAs." },
-                  { name: "@forge/events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable." },
-                  { name: "@forge/db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen." },
-                  { name: "@forge/cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline from your terminal." },
-                ].map((pkg, i) => (
+                  { name: "@forge/spec-compiler", role: "Understands what you want to build", desc: "Parses plain-English specs into structured, executable intent graphs.", highlight: false },
+                  { name: "@forge/intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG.", highlight: false },
+                  { name: "@forge/agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner and AgentScheduler.", highlight: false },
+                  { name: "@forge/verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified.", highlight: false },
+                  { name: "@forge/probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes. Every 5 min. 3 failures cascade the graph. Specs become living SLAs.", highlight: true },
+                  { name: "@forge/events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable.", highlight: false },
+                  { name: "@forge/db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen.", highlight: false },
+                  { name: "@forge/cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline from your terminal.", highlight: false },
+                ].map((pkg) => (
                   <motion.div
                     variants={fadeUp}
                     key={pkg.name}
-                    className="group grid grid-cols-1 lg:grid-cols-[240px_1fr_2fr] gap-4 lg:gap-10 py-6 border-b border-white/[0.04] items-baseline hover:bg-white/[0.015] -mx-6 px-6 transition-colors cursor-default"
+                    className={`group grid grid-cols-1 lg:grid-cols-[240px_1fr_2fr] gap-4 lg:gap-10 py-5 border-b border-white/[0.04] items-baseline -mx-6 px-6 transition-all duration-200 cursor-default ${
+                      pkg.highlight
+                        ? "hover:bg-[#00D4FF]/[0.025] border-l-2 border-l-[#00D4FF]/30 ml-0"
+                        : "hover:bg-white/[0.02]"
+                    }`}
                   >
-                    <code className="font-mono text-[#00D4FF] text-sm shrink-0">
+                    <code className={`font-mono text-sm shrink-0 transition-colors duration-200 ${pkg.highlight ? "text-[#00D4FF]" : "text-[#00D4FF]/70 group-hover:text-[#00D4FF]"}`}>
                       {pkg.name}
+                      {pkg.highlight && <span className="ml-2 text-[10px] font-mono tracking-widest uppercase text-[#00D4FF]/50 border border-[#00D4FF]/20 px-1.5 py-0.5 rounded-sm">new</span>}
                     </code>
-                    <span className="text-white font-semibold text-sm">{pkg.role}</span>
-                    <span className="text-white/40 text-sm font-light leading-relaxed">{pkg.desc}</span>
+                    <span className="text-white/80 font-medium text-sm group-hover:text-white transition-colors">{pkg.role}</span>
+                    <span className="text-white/35 text-sm font-light leading-relaxed group-hover:text-white/50 transition-colors">{pkg.desc}</span>
                   </motion.div>
                 ))}
               </div>
@@ -620,36 +715,64 @@ export default function Home() {
         <ProductionLoopSection />
 
         {/* ─── FINAL CTA ────────────────────────────────── */}
-        <section className="py-40 max-w-6xl mx-auto px-6 text-center">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="flex flex-col items-center"
-          >
-            <motion.h2 variants={fadeUp} className="text-4xl lg:text-6xl font-black tracking-tighter mb-6 leading-tight max-w-2xl">
-              Start building with Forge today.
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-white/40 text-lg font-light mb-12 max-w-lg leading-relaxed">
-              Open source, MIT licensed, no setup fees, no accounts required.
-            </motion.p>
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4">
-              <a
-                href="https://github.com/w1123581321345589/forge-replit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-[#00D4FF] text-[#080810] px-8 py-3.5 font-bold text-sm tracking-wide hover:bg-white transition-all duration-200 flex items-center gap-2"
-              >
-                Star on GitHub
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </a>
-              <div className="flex items-center gap-3 bg-[#07070e] border border-white/[0.06] px-5 py-3.5">
-                <code className="font-mono text-sm text-white/70">npm install -g @forge/cli</code>
-                <CopyButton text="npm install -g @forge/cli" />
-              </div>
+        <section className="relative py-48 overflow-hidden border-t border-white/[0.04]">
+          {/* CTA gradient background */}
+          <div className="pointer-events-none absolute inset-0">
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] rounded-full opacity-[0.06]"
+              style={{ background: "radial-gradient(ellipse, #00D4FF, transparent 65%)", filter: "blur(60px)" }}
+            />
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full opacity-[0.04]"
+              style={{ background: "radial-gradient(ellipse, #7C3AED, transparent 65%)", filter: "blur(80px)" }}
+            />
+          </div>
+          {/* Dot grid */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
+
+          <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              className="flex flex-col items-center"
+            >
+              <motion.div variants={fadeUp} className="mb-6 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] text-white/35 text-[11px] font-mono tracking-widest uppercase">
+                Free & open source
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-4xl lg:text-6xl font-black tracking-[-0.04em] mb-6 leading-[1.05] max-w-2xl">
+                Start building with<br />Forge today.
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-white/35 text-lg font-light mb-12 max-w-lg leading-relaxed">
+                MIT licensed. No setup fees. No accounts. Clone, run, ship.
+              </motion.p>
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="https://github.com/w1123581321345589/forge-replit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative bg-[#00D4FF] text-[#06060f] px-8 py-3.5 font-bold text-sm rounded-md tracking-wide transition-all duration-300 flex items-center gap-2 glow-cyan glow-cyan-hover hover:bg-white"
+                >
+                  Star on GitHub
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                </a>
+                <div
+                  className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] px-5 py-3.5 rounded-md backdrop-blur-sm hover:border-white/[0.12] transition-colors"
+                  style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+                >
+                  <code className="font-mono text-[13px] text-white/60">npm install -g @forge/cli</code>
+                  <CopyButton text="npm install -g @forge/cli" />
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </section>
       </main>
 
