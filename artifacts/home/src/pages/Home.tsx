@@ -433,7 +433,7 @@ export default function Home() {
               className="mb-8 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] text-white/45 text-[11px] font-mono tracking-[0.15em] uppercase backdrop-blur-sm"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse shadow-[0_0_6px_rgba(0,212,255,0.8)]" />
-              v0.1.0 · Open Source · MIT · TypeScript
+              v0.1.0 · MIT · TypeScript · Claude Code Native
             </motion.div>
 
             {/* Headline */}
