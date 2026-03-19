@@ -44,6 +44,13 @@ export function Navbar() {
               {label}
             </a>
           ))}
+          <a
+            href="/playground"
+            className="text-[13px] font-medium text-[#00D4FF]/70 hover:text-[#00D4FF] transition-colors tracking-wide flex items-center gap-1.5"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] inline-block animate-pulse" />
+            Playground
+          </a>
         </nav>
 
         <a
