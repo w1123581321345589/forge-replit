@@ -260,6 +260,59 @@ function calcExecutionGroups(intents: Intent[]): number {
   return Math.max(...Object.values(idToGroup), 0) + 1;
 }
 
+// ─── Probe Inference (deterministic, from @forge/probes logic) ───────────────
+
+interface InferredProbe {
+  intentId: string;
+  intentTarget: string;
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  path: string;
+  expectedStatus: number[];
+  expectedLatencyMs: number | null;
+  rationale: string;
+  schedule: string;
+}
+
+function inferPathFromTarget(target: string, type: Intent["type"]): { method: InferredProbe["method"]; path: string; status: number[] } {
+  const t = target.toLowerCase();
+  if (/login|sign.?in|auth(?!_route)/.test(t))    return { method: "POST", path: "/api/auth/login",        status: [200] };
+  if (/register|sign.?up/.test(t))                 return { method: "POST", path: "/api/auth/register",      status: [201] };
+  if (/refresh|token/.test(t))                     return { method: "GET",  path: "/api/auth/refresh",       status: [200] };
+  if (/password|reset/.test(t))                    return { method: "POST", path: "/api/auth/reset",         status: [200] };
+  if (/auth_route|middleware/.test(t))             return { method: "GET",  path: "/api/auth/me",            status: [200, 401] };
+  if (/user|profile|account/.test(t))              return { method: "GET",  path: "/api/users/me",           status: [200] };
+  if (/email|notification|template/.test(t))       return { method: "POST", path: "/api/email/send",         status: [200, 202] };
+  if (/checkout|payment|charge/.test(t))           return { method: "POST", path: "/api/billing/checkout",   status: [200, 201] };
+  if (/webhook/.test(t))                           return { method: "POST", path: "/api/webhooks/health",    status: [200] };
+  if (/subscription|plan/.test(t))                 return { method: "GET",  path: "/api/billing/subscription", status: [200] };
+  if (/search|filter/.test(t))                     return { method: "GET",  path: "/api/search",             status: [200] };
+  if (/upload|file|storage/.test(t))               return { method: "POST", path: "/api/upload",             status: [201] };
+  if (/cache|rate.?limit/.test(t))                 return { method: "GET",  path: "/api/health",             status: [200] };
+  if (/redis|connection|config/.test(t))           return { method: "GET",  path: "/api/health",             status: [200] };
+  if (/ws|websocket|socket/.test(t))               return { method: "GET",  path: "/api/ws/health",          status: [200] };
+  if (/router|routes?|endpoint/.test(t))           return { method: "GET",  path: "/api/health",             status: [200] };
+  if (type === "db" || type === "migration")       return { method: "GET",  path: "/api/health/db",          status: [200] };
+  if (type === "verification")                     return { method: "GET",  path: "/api/health",             status: [200] };
+  return { method: "GET", path: "/api/health", status: [200] };
+}
+
+function generateProbes(intents: Intent[]): InferredProbe[] {
+  return intents.map((intent) => {
+    const { method, path, status } = inferPathFromTarget(intent.target, intent.type);
+    const isPerf = intent.type === "verification";
+    return {
+      intentId: intent.id,
+      intentTarget: intent.target,
+      method,
+      path,
+      expectedStatus: status,
+      expectedLatencyMs: isPerf ? 500 : null,
+      rationale: `Verifies ${intent.action}:${intent.target} — ${method} ${path} must return ${status.join(" or ")}`,
+      schedule: "every 5 minutes",
+    };
+  });
+}
+
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 router.post("/compile", (req, res) => {
@@ -278,6 +331,7 @@ router.post("/compile", (req, res) => {
   const quality = scoreQuality(spec);
   const ambiguities = detectAmbiguities(spec);
   const intents = extractIntents(spec);
+  const probes = generateProbes(intents);
 
   const totalLines = intents.reduce((s, i) => s + i.estimatedLines, 0);
   const testCount = intents.filter((i) => i.type === "verification").length;
@@ -288,11 +342,13 @@ router.post("/compile", (req, res) => {
     quality,
     ambiguities,
     intents,
+    probes,
     stats: {
       totalIntents: intents.length,
       estimatedLines: totalLines,
       estimatedTests: testCount * 8,
       executionGroups,
+      probeCount: probes.length,
     },
   });
 });
