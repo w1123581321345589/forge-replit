@@ -1,312 +1,149 @@
 # Forge
 
-**A production-ready TypeScript monorepo for orchestrating AI agents.**
+**The agent-first code factory.**
 
-Forge is a full-stack framework for building, running, and verifying intelligent agent pipelines. It provides a structured path from a natural-language specification through intent parsing, agent execution, and automated verification — all in a strongly-typed, composable monorepo.
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-24-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-workspace-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
-[![Tests](https://img.shields.io/badge/tests-187%20passing-22c55e)](https://github.com/w1123581321345589/forge-replit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
+[![Built with Bun](https://img.shields.io/badge/Built%20with-Bun-orange)](https://bun.sh)
+[![v0.1.0](https://img.shields.io/badge/version-0.1.0-green)](CHANGELOG.md)
+[![CI](https://github.com/willrose/forge/actions/workflows/ci.yml/badge.svg)](https://github.com/willrose/forge/actions/workflows/ci.yml)
 
 ---
 
-## What Forge Does
+Every current coding tool makes the same mistake: git is infrastructure, files are the atomic unit, line diffs are the change primitive. These were designed for humans reading code. When agents write and read code, optimizing for human readability is waste.
 
-```
-spec.md
-  └─▶ @forge/spec-compiler   (parse + validate the specification)
-        └─▶ @forge/intent-graph  (resolve intents into an execution graph)
-              └─▶ @forge/agents   (run implementer / verifier agents)
-                    └─▶ @forge/verification  (automated output verification)
-                          └─▶ @forge/api      (REST + WebSocket reporting)
-```
+**Forge inverts this.** Intent is the primary artifact. Code is compiled from it.
 
-The entire pipeline is driven by the `forge` CLI (`@forge/cli`) and backed by a PostgreSQL database (`@forge/db`) with a React web dashboard (`artifacts/home`).
+You write behavioral claims. Agents implement, verify, and deploy against them. Where agents need human judgment, a chief-of-staff agent surfaces exactly one ask — twice a day.
 
 ---
 
-## Repository Layout
+## How it works
 
+```bash
+forge spec "Authenticated users can reset their password via email.
+            The reset link expires after 1 hour."
 ```
-forge-replit/
-├── artifacts/
-│   ├── api-server/          # Express 5 REST API + WebSocket server
-│   └── home/                # React + Vite dashboard / landing page
-├── lib/
-│   ├── api-spec/            # OpenAPI 3.1 spec + Orval codegen config
-│   ├── api-client-react/    # Generated React Query hooks (auto-generated)
-│   ├── api-zod/             # Generated Zod schemas (auto-generated)
-│   └── db/                  # Drizzle ORM schema + PostgreSQL connection
-├── scripts/                 # Utility scripts (seed, healthcheck, …)
-├── pnpm-workspace.yaml      # Workspace packages + version catalog
-├── tsconfig.base.json       # Shared TypeScript base config
-├── tsconfig.json            # Root project references (composite libs)
-└── package.json             # Root task orchestration
+
+The spec compiler parses this into an intent graph of `BehavioralUnit`s — each one a testable behavioral claim with constraints and acceptance criteria. Agents implement, verify, and track every claim. You never look at a file unless you want to.
+
+```bash
+forge status        # intent graph by domain
+forge digest        # what shipped, what's stuck, one ask from your CoS
+forge gaps          # where agents needed you — your R&D roadmap
+forge diff v1 v2    # what changed between deployments, semantically
 ```
+
+![Forge UI — intent map, chief-of-staff digest, and autonomy gap tracker](screenshots/ui-preview.png)
+
+*Intent map (force-directed, color = status), CoS inbox with the one ask, gap tracker with velocity trend.*
 
 ---
 
-## Packages
+## The mental model shift
 
-### `@forge/agents` · `lib/agents`
-
-The agent runtime. Provides a base `Agent` class plus three specialised agents:
-
-| Export | Role |
+| SDLC 1.0 | Forge |
 |---|---|
-| `BaseAgent` | Shared lifecycle, logging, retry |
-| `ImplementerAgent` | Executes implementation tasks |
-| `VerifierAgent` | Runs assertions against outputs |
-| `AgentRunner` | Orchestrates a pipeline of agents |
-| `AgentScheduler` | Schedules agents across queues |
+| File tree | Intent graph |
+| Line diff | Behavioral transition |
+| PR review | Behavioral verification |
+| Issue tracker | Spec compiler |
+| Merge conflict | Claim contradiction |
+| CI/CD | Verification runtime |
 
-### `@forge/intent-graph` · `lib/intent-graph`
+---
 
-Parses a compiled spec into a directed acyclic graph (DAG) of intents. Each node in the graph represents an atomic task; edges encode dependencies. The graph is serialisable and replayable.
+## Architecture
 
-### `@forge/spec-compiler` · `lib/spec-compiler`
+```
+packages/
+├── types/          Zod schemas → TypeScript types
+├── db/             Postgres + pgvector, migrations, vector search
+├── events/         Shared broadcaster (no circular deps)
+├── intent-graph/   BU CRUD, DAG, cascade propagation, autonomy gap tracking
+├── spec-compiler/  NL → TaskGraph, quality gating, conflict detection
+├── verification/   Claim parsing, behavioral verification, regression detection
+├── agents/         Implementer (tournament), Verifier (anti-gaming), Chief-of-Staff
+├── api/            Hono REST + Bun WebSocket + SSE, 30+ endpoints
+└── cli/            forge spec / status / digest / gaps / diff / run / watch
+apps/ui/            React: intent map, CoS inbox, gap tracker, diff view, activity feed
+```
 
-Validates and compiles raw specification files (Markdown, YAML, or JSON) into the normalised `CompiledSpec` type consumed by the intent graph. Supports custom directive plugins.
+**Security is structural, not prompt-based.** Every agent action is logged with its security decision before it executes. Hard blocks on auth/billing/deploy. The Polsia lesson — agents route around prompt guardrails — is handled at the action-log boundary.
 
-### `@forge/verification` · `lib/verification`
+**You manage one agent.** The chief-of-staff agent manages the rest and surfaces one clear ask, twice a day. The `autonomy_gaps` table is your R&D roadmap: where gaps cluster is where to invest.
 
-Runs deterministic and AI-assisted assertions on agent outputs. Integrates with the event bus to publish pass/fail events in real time.
+---
 
-### `@forge/events` · `lib/events`
+## Quickstart
 
-A typed in-process event bus. All major lifecycle events (`agent:start`, `agent:complete`, `task:failed`, `verify:pass`, …) are published here. Subscribers can be attached at any layer.
-
-### `@forge/types` · `lib/types`
-
-Canonical TypeScript types and Zod schemas shared across every package. Single source of truth for `CompiledSpec`, `Intent`, `AgentResult`, `VerificationReport`, and more.
-
-### `@forge/db` · `lib/db`
-
-Database layer built on **Drizzle ORM** with a **PostgreSQL** backend.
-
-- `src/index.ts` — exports a `Pool` + `db` instance; throws at startup if `DATABASE_URL` is missing
-- `src/schema/` — table definitions with `drizzle-zod` insert schemas
-- `drizzle.config.ts` — Drizzle Kit config; run `pnpm --filter @workspace/db push` to sync
-
-### `@forge/api` · `artifacts/api-server`
-
-Express 5 HTTP server. Validates every response against Zod schemas generated from the OpenAPI spec.
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/healthz` | Server health status |
-
-Additional routes for jobs, events, and agent status are added as the pipeline grows. All endpoints follow the contract defined in `lib/api-spec/openapi.yaml`.
-
-### `@forge/cli` · `lib/cli`
-
-The `forge` command-line interface. Entry point: `bin/forge`.
+**Prerequisites:** [Bun v1.0+](https://bun.sh), Docker
 
 ```bash
-forge init <name>            # Scaffold a new Forge project
-forge compile <spec>         # Compile a specification file
-forge parse --intent "<…>"   # Parse a natural-language intent
-forge run                    # Execute the full agent pipeline
-forge verify                 # Run the verification suite
+git clone https://github.com/willrose/forge
+cd forge
+cp .env.example .env        # add ANTHROPIC_API_KEY
+make setup                  # Postgres + pgvector + migrations
+make seed                   # 10 sample BUs across auth/users/billing
+make dev                    # API on :3000, UI on :5173
+```
+
+**Try it:**
+```bash
+forge spec "Authenticated admin users can export all user records as CSV. The export includes email, created_at, and plan. Must complete in under 60 seconds."
+forge status
+forge digest
 ```
 
 ---
 
-## Getting Started
+## Try on Replit
 
-### Prerequisites
-
-| Tool | Version |
-|---|---|
-| Node.js | ≥ 24 |
-| pnpm | ≥ 10 |
-| PostgreSQL | ≥ 15 |
-
-### Install
-
-```bash
-git clone https://github.com/w1123581321345589/forge-replit.git
-cd forge-replit
-pnpm install
-```
-
-### Environment
-
-Copy `.env.example` and fill in the required values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Required | Description |
-|---|---|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `PORT` | ✅ | Port for the API server |
-| `NODE_ENV` | — | `development` \| `production` |
-
-### Database
-
-Push the schema to your local database:
-
-```bash
-pnpm --filter @workspace/db run push
-```
-
-If the schema has changed and a normal push is rejected, use:
-
-```bash
-pnpm --filter @workspace/db run push-force
-```
-
-### Run in Development
-
-Start all services concurrently:
-
-```bash
-# API server (Express)
-pnpm --filter @workspace/api-server run dev
-
-# React dashboard
-pnpm --filter @workspace/home run dev
-```
-
-Both services are proxied through a shared reverse proxy. Access everything at `localhost:80`:
-
-| Path | Service |
-|---|---|
-| `/` | React dashboard |
-| `/api` | Express API server |
+1. Create a new Replit, upload `forge-replit.zip`
+2. Add `ANTHROPIC_API_KEY` to Replit Secrets
+3. Hit **Run** — Postgres starts, migrations run, data seeds, API starts in ~30 seconds
 
 ---
 
-## Scripts
-
-Add utility scripts to `scripts/src/` and register them in `scripts/package.json`. Run with:
+## Tests
 
 ```bash
-pnpm --filter @workspace/scripts run <script-name>
+make test              # 16 test files, all unit, no network, no DB required
+make test-integration  # needs live Postgres
+make test-llm          # needs ANTHROPIC_API_KEY
+make healthcheck       # validates full stack before going live
 ```
-
-Included scripts:
-
-| Script | File | Description |
-|---|---|---|
-| `seed` | `scripts/src/seed.ts` | Populate the database with sample data |
-| `healthcheck` | `scripts/src/healthcheck.ts` | Verify all services are reachable |
 
 ---
 
-## Codegen (OpenAPI → TypeScript)
-
-The API contract lives in `lib/api-spec/openapi.yaml`. Whenever the spec changes, regenerate the client and Zod schemas:
+## Production
 
 ```bash
-pnpm --filter @workspace/api-spec run codegen
+make build-ui    # builds React app into apps/ui/dist
+make deploy      # docker-compose.prod.yml: Postgres + API + Scheduler
 ```
 
-This writes into two packages (do **not** edit these files manually):
-
-| Package | Output |
-|---|---|
-| `@workspace/api-client-react` | React Query hooks (`generated/api.ts`) |
-| `@workspace/api-zod` | Zod schemas (`generated/api.ts`) |
+The API serves the built UI directly. Everything on port 3000.
 
 ---
 
-## TypeScript
+## Why not gstack / Cursor / Devin?
 
-The monorepo uses TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html). `lib/*` packages are **composite** (emit `.d.ts`); `artifacts/*` are leaf packages.
+They're right about role separation. Wrong about the primitive.
 
-```bash
-# Full typecheck (recommended — respects dependency order)
-pnpm run typecheck
+Every tool that wraps agents around git hits the same ceiling: merge conflicts are still text diffs, PR reviews are still humans reading code, CI failures are still "test_auth_login failed" not "the auth claim is violated."
 
-# Build all packages
-pnpm run build
-```
-
-> **Tip:** Always run `pnpm run typecheck` from the root rather than inside individual packages. The root command uses `tsc --build` which resolves the full reference graph.
+Forge makes behavioral claims the source of truth. When a claim at the root of the graph changes, the system propagates `needs_reverification` to every dependent claim automatically. No human traces the cascade. That's the inversion. Everything else follows from it.
 
 ---
 
-## Testing
+## Status
 
-```bash
-# Run all tests across all packages
-pnpm -r run test
+`v0.1.0` — initial public release. Single-tenant, Anthropic-first.
 
-# Run tests in a specific package
-pnpm --filter @workspace/agents run test
-```
-
-**187 tests across 11 test files, all passing.**
-
-| Package | Test files |
-|---|---|
-| `@forge/types` | `schemas.test.ts` |
-| `@forge/events` | `events.test.ts` |
-| `@forge/db` | `db.test.ts` |
-| `@forge/intent-graph` | `graph.test.ts`, `integration.test.ts` |
-| `@forge/spec-compiler` | `compiler.test.ts`, `integration.test.ts` |
-| `@forge/verification` | `verification.test.ts`, `integration.test.ts` |
-| `@forge/agents` | `agents.test.ts`, `implementer.test.ts`, `verifier.test.ts`, `runner.test.ts` |
-| `@forge/api` | `api.test.ts`, `e2e.test.ts` |
-| `@forge/cli` | `cli.test.ts` |
-
----
-
-## Production Build
-
-```bash
-pnpm run build
-```
-
-This runs `typecheck` first, then produces:
-
-- `artifacts/api-server/dist/index.cjs` — bundled Express server (esbuild, CJS)
-- `artifacts/home/dist/public/` — static React app (Vite)
-
-The API bundle inlines its runtime dependencies (express, drizzle-orm, pg, zod, etc.) and externalises the rest.
-
----
-
-## Project Conventions
-
-- **OpenAPI-first** — every API endpoint must be defined in `openapi.yaml` before implementation
-- **Zod everywhere** — request/response validation uses generated Zod schemas; no manual `any`
-- **One schema per file** — each database table lives in its own file under `lib/db/src/schema/`
-- **Catalog versions** — shared dependency versions are pinned in `pnpm-workspace.yaml`; use `catalog:` in `package.json`
-- **Leaf vs. composite** — `lib/*` packages are composite; `artifacts/*` and `scripts` are not; never add leaf packages to the root `tsconfig.json` references
-
----
-
-## Architecture Decision Records
-
-Full architecture notes live in `ARCHITECTURE.md`. Key decisions:
-
-- **pnpm workspaces** over npm/yarn for faster installs, strict isolation, and catalog-pinned versions
-- **Drizzle ORM** over Prisma for zero-runtime codegen and first-class SQL
-- **Orval** over openapi-generator because it targets React Query + Zod natively
-- **Express 5** for async/await support and better error propagation out of the box
-- **esbuild** for production bundling — sub-second builds with tree-shaking
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Quick summary:
-
-1. Fork and clone the repo
-2. Install dependencies: `pnpm install`
-3. Create a feature branch: `git checkout -b feat/my-feature`
-4. Make changes and add tests
-5. Verify everything passes: `pnpm run typecheck && pnpm -r run test`
-6. Open a pull request
+[CHANGELOG](CHANGELOG.md) · [ARCHITECTURE](ARCHITECTURE.md) · [CONTRIBUTING](CONTRIBUTING.md)
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+MIT
