@@ -176,6 +176,167 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+const PROBE_LINES = [
+  { text: "$ forge probe --attach auth_flow --url https://api.myapp.com", type: "cmd", delay: 0 },
+  { text: "", type: "blank", delay: 180 },
+  { text: "✓ 3 criteria → 3 probes inferred", type: "success", delay: 400 },
+  { text: "  → GET   /api/auth/login          expects [200]", type: "probe", delay: 580 },
+  { text: "  → POST  /api/auth/register       expects [201]", type: "probe", delay: 720 },
+  { text: "  → GET   /api/auth/refresh        expects [200]", type: "probe", delay: 860 },
+  { text: "✓ Schedule active: every 5 minutes", type: "success", delay: 1060 },
+  { text: "", type: "blank", delay: 1200 },
+  { text: "12:00  ✓ 3/3  all criteria passing", type: "pass", delay: 1500 },
+  { text: "12:05  ✓ 3/3  all criteria passing", type: "pass", delay: 1900 },
+  { text: "12:10  ✗ 2/3  POST /auth/register → 500", type: "fail", delay: 2400 },
+  { text: "12:15  ✗ 2/3  POST /auth/register → 500", type: "fail", delay: 2800 },
+  { text: "12:20  ✗ 2/3  POST /auth/register → 500", type: "fail", delay: 3200 },
+  { text: "", type: "blank", delay: 3350 },
+  { text: "! 3 consecutive failures — cascading to graph", type: "warn", delay: 3600 },
+  { text: "  auth_flow          → needs_reverification", type: "cascade", delay: 3800 },
+  { text: "  auth_routes        → needs_reverification", type: "cascade", delay: 3950 },
+  { text: "  jwt_middleware     → needs_reverification", type: "cascade", delay: 4100 },
+  { text: "", type: "blank", delay: 4250 },
+  { text: "✓ CoS escalation → inbox", type: "success", delay: 4500 },
+  { text: "  \"POST /auth/register returns 500 (expected 201)\"", type: "ask", delay: 4700 },
+];
+
+function ProbeLine({ line }: { line: typeof PROBE_LINES[0] }) {
+  if (line.type === "blank") return <div className="h-3.5" />;
+  const isCmd = line.type === "cmd";
+  const isSuccess = line.type === "success";
+  const isProbe = line.type === "probe";
+  const isPass = line.type === "pass";
+  const isFail = line.type === "fail";
+  const isWarn = line.type === "warn";
+  const isCascade = line.type === "cascade";
+  const isAsk = line.type === "ask";
+  return (
+    <div className="font-mono text-[11px] sm:text-[12px] leading-[1.75]">
+      {isCmd && <span><span className="text-white/25 select-none">$ </span><span className="text-white">{line.text.slice(2)}</span></span>}
+      {isSuccess && <span><span className="text-[#00D4FF]">✓</span><span className="text-white/70"> {line.text.slice(2)}</span></span>}
+      {isProbe && <span className="text-white/35">{line.text}</span>}
+      {isPass && <span><span className="text-white/30">{line.text.slice(0, 6)}</span><span className="text-green-400">  ✓</span><span className="text-white/40"> {line.text.slice(9)}</span></span>}
+      {isFail && <span><span className="text-white/30">{line.text.slice(0, 6)}</span><span className="text-red-400">  ✗</span><span className="text-red-400/70"> {line.text.slice(9)}</span></span>}
+      {isWarn && <span className="text-orange-400 font-semibold">{line.text}</span>}
+      {isCascade && <span><span className="text-white/30">{line.text.split("→")[0]}</span><span className="text-orange-400">→</span><span className="text-orange-400/70"> needs_reverification</span></span>}
+      {isAsk && <span className="text-[#00D4FF]/60 italic">{line.text}</span>}
+    </div>
+  );
+}
+
+function ProbeTerminal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    if (!inView || started) return;
+    setStarted(true);
+    PROBE_LINES.forEach((line, i) => {
+      setTimeout(() => setVisibleCount(i + 1), line.delay);
+    });
+  }, [inView, started]);
+
+  return (
+    <div ref={ref} className="bg-[#07070e] border border-white/[0.07] overflow-hidden">
+      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.05] bg-[#0a0a14]">
+        <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+        <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+        <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+        <span className="ml-3 font-mono text-[11px] text-white/30 tracking-wide">forge probe — bash</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <span className="font-mono text-[10px] text-white/25">live</span>
+        </div>
+      </div>
+      <div className="p-6 min-h-[380px]">
+        {PROBE_LINES.slice(0, visibleCount).map((line, i) => (
+          <ProbeLine key={i} line={line} />
+        ))}
+        {visibleCount < PROBE_LINES.length && (
+          <span className="inline-block w-2 h-3.5 bg-[#00D4FF] animate-pulse ml-0.5" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProductionLoopSection() {
+  return (
+    <section className="border-t border-white/[0.04] py-40 bg-[#050508]">
+      <div className="max-w-6xl mx-auto px-6">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start"
+        >
+          {/* Left: copy */}
+          <div>
+            <motion.p variants={fadeUp} className="font-mono text-xs text-[#00D4FF] tracking-widest uppercase mb-6">
+              @forge/probes
+            </motion.p>
+            <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-tight">
+              Deployment is the beginning of the next loop.
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-white/45 text-base font-light leading-relaxed mb-14 max-w-lg">
+              The moment a claim transitions to <code className="font-mono text-white/70 bg-white/[0.05] px-1.5 py-0.5 text-sm">deployed</code>, attach a probe. Your acceptance criteria become HTTP assertions running every five minutes against production. When reality diverges from the spec, the graph knows first.
+            </motion.p>
+
+            <motion.div variants={stagger} className="space-y-8">
+              {[
+                {
+                  n: "01",
+                  title: "Specs become probes — automatically",
+                  body: "The acceptance criteria you wrote to specify the claim are translated into concrete HTTP assertions. No test code to write. No monitoring to configure.",
+                  color: "text-[#00D4FF]",
+                },
+                {
+                  n: "02",
+                  title: "Three failures cascade the graph",
+                  body: "At three consecutive failures, every dependent BU transitions to needs_reverification. The intent map turns red. You see exactly which claims are failing and why.",
+                  color: "text-orange-400",
+                },
+                {
+                  n: "03",
+                  title: "One ask. Nothing else.",
+                  body: "The chief-of-staff escalation contains the exact claim that failed and the exact ask. No noise. The claim-to-reality gap closes permanently.",
+                  color: "text-green-400",
+                },
+              ].map((item) => (
+                <motion.div
+                  key={item.n}
+                  variants={fadeUp}
+                  className="flex gap-5 group"
+                >
+                  <span className={`font-mono text-xs ${item.color} opacity-50 shrink-0 mt-1 w-5`}>{item.n}</span>
+                  <div>
+                    <p className="font-semibold text-sm text-white mb-1.5">{item.title}</p>
+                    <p className="text-white/40 text-sm font-light leading-relaxed">{item.body}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="mt-14 pt-10 border-t border-white/[0.04]">
+              <div className="flex items-center gap-3 bg-[#07070e] border border-white/[0.06] px-5 py-3.5 inline-flex w-auto">
+                <code className="font-mono text-sm text-white/70">forge probe --attach &lt;buId&gt; --url https://api.yourapp.com</code>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right: probe terminal */}
+          <motion.div variants={fadeUp}>
+            <ProbeTerminal />
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -433,9 +594,10 @@ export default function Home() {
                   { name: "@forge/intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG." },
                   { name: "@forge/agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner and AgentScheduler." },
                   { name: "@forge/verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified." },
+                  { name: "@forge/probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes. Every 5 minutes. 3 failures cascade the graph. Specs become living SLAs." },
                   { name: "@forge/events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable." },
                   { name: "@forge/db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen." },
-                  { name: "@forge/cli", role: "One command to rule them all", desc: "forge init · compile · run · verify. The entire pipeline from your terminal." },
+                  { name: "@forge/cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline from your terminal." },
                 ].map((pkg, i) => (
                   <motion.div
                     variants={fadeUp}
@@ -453,6 +615,9 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+
+        {/* ─── PRODUCTION LOOP ──────────────────────────── */}
+        <ProductionLoopSection />
 
         {/* ─── FINAL CTA ────────────────────────────────── */}
         <section className="py-40 max-w-6xl mx-auto px-6 text-center">
