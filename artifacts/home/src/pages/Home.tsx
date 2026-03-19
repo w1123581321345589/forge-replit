@@ -456,8 +456,10 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
               className="text-[1.1rem] text-white/40 max-w-[520px] leading-[1.75] font-light mb-10"
             >
-              Write a spec in plain English. Forge compiles it into a verified,
-              tested codebase — automatically. No scaffolding. No handholding.
+              Every coding tool makes the same mistake: files as atoms, diffs as
+              primitives — built for humans reading code. Agents don't read code.
+              Forge gives them intent. Write a behavioral claim once. It becomes
+              code, tests, and a running production probe.
             </motion.p>
 
             {/* CTAs */}
@@ -529,8 +531,8 @@ export default function Home() {
             {[
               { value: 341, suffix: "", label: "Lines from spec to shipping" },
               { value: 4, suffix: " min", label: "Average pipeline runtime" },
-              { value: 187, suffix: "", label: "Tests across 11 packages" },
-              { value: 0, suffix: "", label: "Production failures in CI" },
+              { value: 290, suffix: "", label: "Tests across 12 packages" },
+              { value: 13, suffix: "", label: "MCP tools for Claude Code" },
             ].map((stat, i) => (
               <motion.div variants={fadeUp} key={i} className="flex flex-col px-8 py-10 first:pl-0 group">
                 <span
@@ -561,20 +563,21 @@ export default function Home() {
                 Get started
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-tight">
-                Up and running<br />in under a minute.
+                The runtime takes<br />a minute.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/50 text-lg font-light leading-relaxed">
-                Install the CLI, scaffold a project, write a spec in plain English.
-                Forge handles everything else — architecture, implementation, tests.
+                Install once. Write a behavioral claim. Everything else —
+                intent parsing, agent orchestration, verification — compiles from that.
               </motion.p>
             </div>
 
             <motion.div variants={fadeUp} className="space-y-2">
               {[
                 { label: "Install", code: "npm install -g @forge/cli", n: "01" },
-                { label: "Scaffold", code: "forge init my-project", n: "02" },
+                { label: "Init", code: "forge init my-project", n: "02" },
                 { label: "Compile", code: "forge compile spec.md", n: "03" },
-                { label: "Ship", code: "forge run && forge verify", n: "04" },
+                { label: "Run", code: "forge run && forge verify", n: "04" },
+                { label: "Monitor", code: "forge portfolio", n: "05" },
               ].map(({ label, code, n }) => (
                 <div
                   key={label}
@@ -604,7 +607,7 @@ export default function Home() {
                 Architecture
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-[-0.04em] mb-24 leading-[1.1] max-w-xl">
-                From idea<br />to verified PR.
+                Intent compiles to code.<br />Not the other way around.
               </motion.h2>
 
               <div className="relative grid grid-cols-1 lg:grid-cols-5 gap-0">
@@ -615,11 +618,11 @@ export default function Home() {
                 />
 
                 {[
-                  { n: "01", title: "Write a spec", body: "Plain English or YAML. Describe what to build, not how." },
-                  { n: "02", title: "Compile", body: "Spec-compiler resolves intents, validates constraints, emits a type-safe graph." },
-                  { n: "03", title: "Run agents", body: "Implementer and verifier agents execute in strict dependency order." },
-                  { n: "04", title: "Verify", body: "Every output is asserted against the original spec before it merges." },
-                  { n: "05", title: "Ship", body: "Clean PR. Full test coverage. Zero manual steps." },
+                  { n: "01", title: "Write a claim", body: "One behavioral assertion. 'Authenticated users can reset their password. The link expires after one hour.' Ambiguity is an error, not a warning." },
+                  { n: "02", title: "Compile", body: "Spec-compiler parses claims into a type-safe intent graph. Specs scoring below 40/100 are rejected before a single agent starts." },
+                  { n: "03", title: "Run agents", body: "Implementer and verifier agents execute in topological order. Tournament loop — up to three parallel implementations. Winner by behavioral score." },
+                  { n: "04", title: "Verify", body: "Anti-gaming audit. An agent that makes tests pass without satisfying the claim fails verification and never merges." },
+                  { n: "05", title: "Monitor", body: "The claim deploys as code. It also deploys as an HTTP probe — running every 5 minutes against your production URL. Three failures cascade the graph." },
                 ].map((s, i) => (
                   <motion.div
                     variants={fadeUp}
@@ -684,22 +687,23 @@ export default function Home() {
                 Packages
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 leading-tight">
-                Your virtual engineering team.
+                Nine packages. One loop.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/40 text-lg font-light mb-12 max-w-xl leading-relaxed">
-                Each package is a specialist. Together, they replace a workflow that used to take a team of five.
+                The intent graph is the source of truth. Every package reads from it. Nothing drifts.
               </motion.p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
-                  { name: "@forge/spec-compiler", short: "spec-compiler", role: "Understands what you want to build", desc: "Parses plain-English specs into structured, executable intent graphs.", highlight: false },
-                  { name: "@forge/intent-graph", short: "intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG.", highlight: false },
-                  { name: "@forge/agents", short: "agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner.", highlight: false },
-                  { name: "@forge/verification", short: "verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified.", highlight: false },
-                  { name: "@forge/probes", short: "probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes every 5 min. 3 failures cascade the graph.", highlight: true },
-                  { name: "@forge/events", short: "events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable.", highlight: false },
-                  { name: "@forge/db", short: "db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen.", highlight: false },
-                  { name: "@forge/cli", short: "cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline.", highlight: false },
+                  { name: "@forge/spec-compiler", short: "spec-compiler", role: "Rejects ambiguity before agents start", desc: "Parses claims into intent graphs. Quality gating: specs below 40/100 are rejected with reasons. Ambiguity is an error, not a warning.", highlight: false, isNew: false },
+                  { name: "@forge/intent-graph", short: "intent-graph", role: "The source of truth", desc: "DAG with cycle detection. Topological execution order. Cascade propagation when production fails. Semantic similarity search over every claim ever written.", highlight: false, isNew: false },
+                  { name: "@forge/agents", short: "agents", role: "Tournament loop, not coin flip", desc: "1–3 parallel implementations. Winner selected by behavioral score minus complexity penalty. AgentRunner bounded concurrency. ChiefOfStaff surfaces one ask, twice a day.", highlight: false, isNew: false },
+                  { name: "@forge/verification", short: "verification", role: "Anti-gaming, built in", desc: "Agents that make tests pass without satisfying the claim fail audit before merge. Regression detection. Three consecutive failures escalate to the CoS inbox.", highlight: false, isNew: false },
+                  { name: "@forge/probes", short: "probes", role: "Specs that stay alive in production", desc: "Acceptance criteria → HTTP probes, every 5 minutes. Three failures cascade `needs_reverification` through the intent graph and page the CoS.", highlight: true, isNew: false },
+                  { name: "@forge/events", short: "events", role: "Every action, fully audited", desc: "Hard blocks on auth, billing, deploy. Soft blocks on deletes. Security is structural — enforced at the action-log boundary before execution, not at the prompt.", highlight: false, isNew: false },
+                  { name: "@forge/db", short: "db", role: "Semantic memory over every claim", desc: "Postgres + pgvector. 1536-dim embeddings. Cosine similarity search finds conflicting claims before they compile — the spec-compiler's conflict detector runs over this.", highlight: false, isNew: false },
+                  { name: "@forge/cli", short: "cli", role: "The full pipeline in one binary", desc: "forge spec · status · digest · gaps · diff · probe · watch · portfolio. Every lifecycle command. Works standalone or as a CoS-dispatched tool.", highlight: false, isNew: false },
+                  { name: "@forge/mcp", short: "mcp", role: "Claude Code's native Forge interface", desc: "13 MCP tools. forge_compile_spec, forge_dispatch, forge_get_portfolio, forge_propagate_annotation. The Command Center dispatches across all workspaces. No dashboard needed.", highlight: true, isNew: true },
                 ].map((pkg) => (
                   <motion.div
                     variants={fadeUp}
@@ -722,7 +726,7 @@ export default function Home() {
                     )}
                     <div className={`font-mono text-[11px] mb-3 tracking-tight flex items-center gap-2 ${pkg.highlight ? "text-[#00D4FF]" : "text-[#00D4FF]/55 group-hover:text-[#00D4FF]/80"} transition-colors`}>
                       <span>@forge/</span><span className="text-white/60 group-hover:text-white/90 transition-colors">{pkg.short}</span>
-                      {pkg.highlight && <span className="text-[9px] border border-[#00D4FF]/30 px-1 py-0.5 rounded text-[#00D4FF]/60 tracking-widest uppercase">new</span>}
+                      {pkg.isNew && <span className="text-[9px] border border-[#00D4FF]/30 px-1 py-0.5 rounded text-[#00D4FF]/60 tracking-widest uppercase">new</span>}
                     </div>
                     <div className="text-[13px] font-semibold text-white/85 mb-2 leading-snug group-hover:text-white transition-colors">{pkg.role}</div>
                     <div className="text-[12px] text-white/30 leading-relaxed group-hover:text-white/45 transition-colors">{pkg.desc}</div>
@@ -770,10 +774,10 @@ export default function Home() {
                 Free & open source
               </motion.div>
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-6xl font-black tracking-[-0.04em] mb-6 leading-[1.05] max-w-2xl">
-                Start building with<br />Forge today.
+                The loop that<br />never closes —<br />until now.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/35 text-lg font-light mb-12 max-w-lg leading-relaxed">
-                MIT licensed. No setup fees. No accounts. Clone, run, ship.
+                MIT licensed. 290 tests. Claude Code native. Intent is the artifact — and it's open source.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3">
                 <a
