@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.env
+.env.local
+*.local
+
+# Lockfiles — use bun.lockb (Bun-native), not npm's
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Forge runtime
+.forge/
+*.log
+
+# Build outputs
+apps/ui/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+
+# Test coverage
+coverage/
