@@ -38,16 +38,29 @@ interface Intent {
   badge: string;
 }
 
+interface InferredProbe {
+  intentId: string;
+  intentTarget: string;
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  path: string;
+  expectedStatus: number[];
+  expectedLatencyMs: number | null;
+  rationale: string;
+  schedule: string;
+}
+
 interface CompileResult {
   compileTime: number;
   quality: Quality;
   ambiguities: Ambiguity[];
   intents: Intent[];
+  probes: InferredProbe[];
   stats: {
     totalIntents: number;
     estimatedLines: number;
     estimatedTests: number;
     executionGroups: number;
+    probeCount: number;
   };
 }
 
@@ -290,6 +303,80 @@ function QualityBar({ label, value }: { label: string; value: number }) {
   );
 }
 
+// ─── Probes Panel ────────────────────────────────────────────────────────────
+
+const METHOD_COLORS: Record<string, { bg: string; text: string }> = {
+  GET:    { bg: "#0d2a1e", text: "#4ade80" },
+  POST:   { bg: "#0d1f3b", text: "#60a5fa" },
+  PUT:    { bg: "#1a1a08", text: "#facc15" },
+  DELETE: { bg: "#2a0d0d", text: "#f87171" },
+  PATCH:  { bg: "#1a0d2a", text: "#c084fc" },
+};
+
+function ProbesPanel({ probes, intents }: { probes: InferredProbe[]; intents: Intent[] }) {
+  const intentMap = new Map(intents.map((i) => [i.id, i]));
+  if (probes.length === 0) return (
+    <div className="flex items-center justify-center h-full">
+      <p className="font-mono text-sm text-white/20">No probes — compile a spec first</p>
+    </div>
+  );
+
+  return (
+    <div className="p-6 space-y-3 overflow-auto h-full">
+      <div className="mb-6">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/25 mb-1">
+          {probes.length} probes · attach with <code className="text-[#00D4FF]/60">forge probe --attach &lt;buId&gt; --url https://…</code>
+        </p>
+      </div>
+      {probes.map((probe, i) => {
+        const intent = intentMap.get(probe.intentId);
+        const colors = METHOD_COLORS[probe.method] ?? METHOD_COLORS.GET;
+        return (
+          <motion.div
+            key={probe.intentId}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.035 }}
+            className="bg-[#07070e] border border-white/[0.05] p-4 space-y-3"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm shrink-0"
+                style={{ backgroundColor: colors.bg, color: colors.text }}
+              >
+                {probe.method}
+              </span>
+              <code className="font-mono text-[13px] text-white/80 flex-1 min-w-0 truncate">{probe.path}</code>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {probe.expectedStatus.map((s) => (
+                  <span key={s} className="font-mono text-[10px] text-white/30 bg-white/[0.04] px-1.5 py-0.5 rounded-sm">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-[10px] font-mono">
+              <span className="text-white/25">
+                {probe.intentId} · {intent?.action}:{intent?.target}
+              </span>
+              {probe.expectedLatencyMs && (
+                <span className="text-orange-400/60">&lt; {probe.expectedLatencyMs}ms</span>
+              )}
+              <div className="ml-auto flex items-center gap-1.5 text-white/20">
+                <div className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />
+                {probe.schedule}
+              </div>
+            </div>
+
+            <p className="text-[11px] text-white/25 font-mono leading-relaxed">{probe.rationale}</p>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Main Playground ──────────────────────────────────────────────────────────
 
 export default function Playground() {
@@ -298,6 +385,7 @@ export default function Playground() {
   const [result, setResult] = useState<CompileResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [compiling, setCompiling] = useState(false);
+  const [activeTab, setActiveTab] = useState<"graph" | "probes">("graph");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const compile = useCallback(async (text: string) => {
@@ -461,10 +549,37 @@ export default function Playground() {
 
         {/* RIGHT — Graph */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <div className="px-5 py-3 border-b border-white/[0.04] flex items-center justify-between shrink-0">
-            <span className="font-mono text-[11px] text-white/30 uppercase tracking-widest">Intent Graph</span>
+          <div className="px-5 py-2.5 border-b border-white/[0.04] flex items-center justify-between shrink-0 gap-4">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveTab("graph")}
+                className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest rounded-sm transition-colors ${
+                  activeTab === "graph"
+                    ? "text-white bg-white/[0.07]"
+                    : "text-white/30 hover:text-white/60"
+                }`}
+              >
+                Intent Graph
+              </button>
+              <button
+                onClick={() => setActiveTab("probes")}
+                className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest rounded-sm transition-colors flex items-center gap-1.5 ${
+                  activeTab === "probes"
+                    ? "text-[#00D4FF] bg-[#00D4FF]/[0.07]"
+                    : "text-white/30 hover:text-white/60"
+                }`}
+              >
+                {result && result.probes.length > 0 && (
+                  <span className={`w-1 h-1 rounded-full ${activeTab === "probes" ? "bg-[#00D4FF] animate-pulse" : "bg-white/20"}`} />
+                )}
+                Production Probes
+                {result && result.stats.probeCount > 0 && (
+                  <span className="text-[9px] text-white/20 font-normal normal-case">{result.stats.probeCount}</span>
+                )}
+              </button>
+            </div>
             {result && (
-              <div className="flex items-center gap-4 font-mono text-[10px] text-white/30">
+              <div className="flex items-center gap-4 font-mono text-[10px] text-white/30 shrink-0">
                 <span><span className="text-white/60">{result.stats.totalIntents}</span> intents</span>
                 <span><span className="text-[#00D4FF]">~{result.stats.estimatedLines}</span> lines</span>
                 <span><span className="text-green-400">{result.stats.estimatedTests}</span> tests</span>
@@ -499,6 +614,16 @@ export default function Playground() {
                   <p className="font-mono text-sm text-white/15">
                     {compiling ? "Compiling spec…" : "Start typing to compile"}
                   </p>
+                </motion.div>
+              ) : activeTab === "probes" ? (
+                <motion.div
+                  key="probes"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0"
+                >
+                  <ProbesPanel probes={result.probes} intents={result.intents} />
                 </motion.div>
               ) : result.intents.length === 0 ? (
                 <motion.div
