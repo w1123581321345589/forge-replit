@@ -104,7 +104,7 @@ function TerminalLine({ line }: { line: typeof TERMINAL_LINES[0] }) {
 
 function AnimatedTerminal() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "0px" });
   const [visibleCount, setVisibleCount] = useState(0);
   const [started, setStarted] = useState(false);
 
@@ -117,14 +117,23 @@ function AnimatedTerminal() {
   }, [inView, started]);
 
   return (
-    <div ref={ref} className="bg-[#07070e] border border-white/[0.07] overflow-hidden">
-      <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.05] bg-[#0a0a14]">
-        <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-        <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-        <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-        <span className="ml-3 font-mono text-[11px] text-white/30 tracking-wide">forge — bash</span>
+    <div ref={ref} className="bg-[#050510] overflow-hidden">
+      <div
+        className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06]"
+        style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)" }}
+      >
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+          <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+          <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+        </div>
+        <div className="flex-1 flex justify-center">
+          <div className="bg-white/[0.04] border border-white/[0.06] rounded-md px-12 py-1">
+            <span className="font-mono text-[11px] text-white/25 tracking-wide">forge compile spec.md</span>
+          </div>
+        </div>
       </div>
-      <div className="p-6 sm:p-8 lg:p-10 min-h-[480px]">
+      <div className="p-6 sm:p-8 min-h-[400px]">
         {TERMINAL_LINES.slice(0, visibleCount).map((line, i) => (
           <TerminalLine key={i} line={line} />
         ))}
@@ -384,125 +393,128 @@ export default function Home() {
 
       <main>
         {/* ─── HERO ─────────────────────────────────────── */}
-        <section
-          id="hero"
-          className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 overflow-hidden"
-        >
-          {/* Gradient orbs */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div
-              className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full opacity-[0.07]"
-              style={{ background: "radial-gradient(ellipse, #00D4FF, transparent 70%)", filter: "blur(60px)" }}
-            />
-            <div
-              className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-[0.05]"
-              style={{ background: "radial-gradient(ellipse, #7C3AED, transparent 70%)", filter: "blur(80px)" }}
-            />
-            <div
-              className="absolute bottom-[10%] right-[-5%] w-[500px] h-[500px] rounded-full opacity-[0.04]"
-              style={{ background: "radial-gradient(ellipse, #0EA5E9, transparent 70%)", filter: "blur(80px)" }}
-            />
+        <section id="hero" className="relative overflow-hidden">
+          {/* === Layered background === */}
+
+          {/* 1. Mesh gradient — strong, visible */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: `
+              radial-gradient(ellipse 80% 70% at 10% -10%, rgba(112, 56, 255, 0.22) 0%, transparent 55%),
+              radial-gradient(ellipse 70% 60% at 90% 0%, rgba(0, 212, 255, 0.18) 0%, transparent 55%),
+              radial-gradient(ellipse 50% 40% at 50% 110%, rgba(0, 190, 255, 0.07) 0%, transparent 60%)
+            `
+          }} />
+
+          {/* 2. Grid lines */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px)
+            `,
+            backgroundSize: "60px 60px"
+          }} />
+
+          {/* 3. Center radial vignette (pops center content) */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 100% 80% at 50% 0%, transparent 20%, rgba(6,6,15,0.7) 80%)"
+          }} />
+
+          {/* 4. Bottom fade into next section */}
+          <div className="absolute bottom-0 left-0 right-0 h-80 pointer-events-none bg-gradient-to-t from-[#06060f] via-[#06060f]/60 to-transparent" />
+
+          {/* === Content === */}
+          <div className="relative z-10 max-w-6xl mx-auto px-6 pt-36 pb-0 flex flex-col items-center text-center">
+
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] text-white/45 text-[11px] font-mono tracking-[0.15em] uppercase backdrop-blur-sm"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse shadow-[0_0_6px_rgba(0,212,255,0.8)]" />
+              v0.1.0 · Open Source · MIT · TypeScript
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, delay: 0.07, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[clamp(3rem,8.5vw,7rem)] font-black tracking-[-0.045em] leading-[1.0] mb-6 max-w-5xl"
+            >
+              One engineer.
+              <br />
+              <span className="gradient-text">The output</span>
+              {" "}of ten.
+            </motion.h1>
+
+            {/* Subtext */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[1.1rem] text-white/40 max-w-[520px] leading-[1.75] font-light mb-10"
+            >
+              Write a spec in plain English. Forge compiles it into a verified,
+              tested codebase — automatically. No scaffolding. No handholding.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center gap-3 mb-20"
+            >
+              <a
+                href="https://github.com/w1123581321345589/forge-replit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-[#00D4FF] text-[#06060f] px-7 py-3 font-bold text-[14px] rounded-lg tracking-wide transition-all duration-300 flex items-center gap-2 glow-cyan glow-cyan-hover hover:bg-white"
+              >
+                View on GitHub
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              </a>
+              <a
+                href="/playground"
+                className="group px-7 py-3 font-medium text-[14px] text-white/50 hover:text-white transition-all duration-200 border border-white/[0.09] hover:border-white/20 rounded-lg bg-white/[0.03] hover:bg-white/[0.05] flex items-center gap-2"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse" />
+                Try Playground
+              </a>
+            </motion.div>
+
+            {/* ─── PRODUCT VISUAL: Terminal floating in hero ─── */}
+            <motion.div
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-4xl mb-0"
+              id="pipeline"
+            >
+              {/* Ambient glow under terminal */}
+              <div className="absolute -inset-x-20 -bottom-10 h-48 pointer-events-none" style={{
+                background: "radial-gradient(ellipse at 50% 100%, rgba(0,212,255,0.09) 0%, transparent 65%)",
+                filter: "blur(28px)"
+              }} />
+
+              {/* Terminal window frame */}
+              <div
+                className="relative rounded-2xl overflow-hidden border border-white/[0.1]"
+                style={{
+                  boxShadow: "0 80px 200px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  transform: "perspective(2000px) rotateX(4deg)",
+                  transformOrigin: "top center",
+                }}
+              >
+                <AnimatedTerminal />
+              </div>
+            </motion.div>
           </div>
 
-          {/* Dot grid */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }}
-          />
-          {/* Edge fades */}
-          <div className="pointer-events-none absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, #06060f 100%)" }}
-          />
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#06060f] to-transparent" />
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative z-10 mb-10 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-white/40 text-[11px] font-mono tracking-widest uppercase backdrop-blur-sm"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            v0.1.0 — Open Source · MIT · TypeScript
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 text-[clamp(3.2rem,9.5vw,7.5rem)] font-black tracking-[-0.04em] leading-[1.0] mb-8 max-w-5xl"
-          >
-            One engineer.
-            <br />
-            <span className="gradient-text">The output</span>
-            {" "}of ten.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 text-lg sm:text-[1.2rem] text-white/40 max-w-xl leading-[1.7] font-light mb-12"
-          >
-            Forge turns a plain-English spec into a verified, tested codebase — automatically.
-            Intent parsing, agent orchestration, and built-in verification in a single TypeScript framework.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="relative z-10 flex flex-col sm:flex-row items-center gap-3"
-          >
-            <a
-              href="https://github.com/w1123581321345589/forge-replit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative bg-[#00D4FF] text-[#06060f] px-8 py-3.5 font-bold text-sm rounded-md tracking-wide transition-all duration-300 flex items-center gap-2 glow-cyan glow-cyan-hover hover:bg-white"
-            >
-              View on GitHub
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
-            </a>
-            <a
-              href="#quickstart"
-              className="px-8 py-3.5 font-medium text-sm text-white/40 hover:text-white/80 transition-all duration-200 border border-white/[0.07] hover:border-white/[0.15] rounded-md bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm"
-            >
-              Quick start
-            </a>
-          </motion.div>
-
-          {/* Scroll hint */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5, duration: 0.8 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-          >
-            <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-pulse" />
-          </motion.div>
-        </section>
-
-        {/* ─── TERMINAL ─────────────────────────────────── */}
-        <section id="pipeline" className="max-w-5xl mx-auto px-6 pb-40 -mt-4">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative"
-          >
-            {/* Glow behind terminal */}
-            <div
-              className="absolute -inset-8 rounded-3xl opacity-[0.35] pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 80%, rgba(0,212,255,0.08), transparent 70%)", filter: "blur(20px)" }}
-            />
-            <div className="relative shadow-[0_32px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)]">
-              <AnimatedTerminal />
-            </div>
-          </motion.div>
+          {/* Spacer so terminal overlaps into stats section naturally */}
+          <div className="h-24" />
         </section>
 
         {/* ─── STATS ────────────────────────────────────── */}
@@ -674,36 +686,46 @@ export default function Home() {
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 leading-tight">
                 Your virtual engineering team.
               </motion.h2>
-              <motion.p variants={fadeUp} className="text-white/40 text-lg font-light mb-20 max-w-xl leading-relaxed">
+              <motion.p variants={fadeUp} className="text-white/40 text-lg font-light mb-12 max-w-xl leading-relaxed">
                 Each package is a specialist. Together, they replace a workflow that used to take a team of five.
               </motion.p>
 
-              <div className="border-t border-white/[0.05]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
-                  { name: "@forge/spec-compiler", role: "Understands what you want to build", desc: "Parses plain-English specs into structured, executable intent graphs.", highlight: false },
-                  { name: "@forge/intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG.", highlight: false },
-                  { name: "@forge/agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner and AgentScheduler.", highlight: false },
-                  { name: "@forge/verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified.", highlight: false },
-                  { name: "@forge/probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes. Every 5 min. 3 failures cascade the graph. Specs become living SLAs.", highlight: true },
-                  { name: "@forge/events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable.", highlight: false },
-                  { name: "@forge/db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen.", highlight: false },
-                  { name: "@forge/cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline from your terminal.", highlight: false },
+                  { name: "@forge/spec-compiler", short: "spec-compiler", role: "Understands what you want to build", desc: "Parses plain-English specs into structured, executable intent graphs.", highlight: false },
+                  { name: "@forge/intent-graph", short: "intent-graph", role: "Plans before it codes", desc: "Resolves dependencies, orders tasks, maps the full execution DAG.", highlight: false },
+                  { name: "@forge/agents", short: "agents", role: "Writes the code", desc: "ImplementerAgent and VerifierAgent orchestrated by AgentRunner.", highlight: false },
+                  { name: "@forge/verification", short: "verification", role: "Ships only what works", desc: "Automated assertions, regression tests, CI gate. Nothing merges un-verified.", highlight: false },
+                  { name: "@forge/probes", short: "probes", role: "Keeps it working in production", desc: "Acceptance criteria → HTTP probes every 5 min. 3 failures cascade the graph.", highlight: true },
+                  { name: "@forge/events", short: "events", role: "Nothing gets lost", desc: "Typed event bus: every agent action is observable, loggable, and replayable.", highlight: false },
+                  { name: "@forge/db", short: "db", role: "Remembers everything", desc: "Drizzle ORM + PostgreSQL. Schema-first, zero magic, zero runtime codegen.", highlight: false },
+                  { name: "@forge/cli", short: "cli", role: "One command to rule them all", desc: "forge init · compile · run · probe · verify. The entire pipeline.", highlight: false },
                 ].map((pkg) => (
                   <motion.div
                     variants={fadeUp}
                     key={pkg.name}
-                    className={`group grid grid-cols-1 lg:grid-cols-[240px_1fr_2fr] gap-4 lg:gap-10 py-5 border-b border-white/[0.04] items-baseline -mx-6 px-6 transition-all duration-200 cursor-default ${
+                    className={`group relative rounded-xl p-5 border transition-all duration-300 cursor-default overflow-hidden ${
                       pkg.highlight
-                        ? "hover:bg-[#00D4FF]/[0.025] border-l-2 border-l-[#00D4FF]/30 ml-0"
-                        : "hover:bg-white/[0.02]"
+                        ? "border-[#00D4FF]/25 hover:border-[#00D4FF]/50"
+                        : "border-white/[0.06] hover:border-white/[0.14]"
                     }`}
+                    style={{
+                      background: pkg.highlight
+                        ? "linear-gradient(145deg, rgba(0,212,255,0.06) 0%, rgba(0,212,255,0.02) 100%)"
+                        : "linear-gradient(145deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)"
+                    }}
                   >
-                    <code className={`font-mono text-sm shrink-0 transition-colors duration-200 ${pkg.highlight ? "text-[#00D4FF]" : "text-[#00D4FF]/70 group-hover:text-[#00D4FF]"}`}>
-                      {pkg.name}
-                      {pkg.highlight && <span className="ml-2 text-[10px] font-mono tracking-widest uppercase text-[#00D4FF]/50 border border-[#00D4FF]/20 px-1.5 py-0.5 rounded-sm">new</span>}
-                    </code>
-                    <span className="text-white/80 font-medium text-sm group-hover:text-white transition-colors">{pkg.role}</span>
-                    <span className="text-white/35 text-sm font-light leading-relaxed group-hover:text-white/50 transition-colors">{pkg.desc}</span>
+                    {/* Top right glow on highlight */}
+                    {pkg.highlight && (
+                      <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full opacity-30 pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(0,212,255,0.4), transparent 70%)", filter: "blur(12px)" }} />
+                    )}
+                    <div className={`font-mono text-[11px] mb-3 tracking-tight flex items-center gap-2 ${pkg.highlight ? "text-[#00D4FF]" : "text-[#00D4FF]/55 group-hover:text-[#00D4FF]/80"} transition-colors`}>
+                      <span>@forge/</span><span className="text-white/60 group-hover:text-white/90 transition-colors">{pkg.short}</span>
+                      {pkg.highlight && <span className="text-[9px] border border-[#00D4FF]/30 px-1 py-0.5 rounded text-[#00D4FF]/60 tracking-widest uppercase">new</span>}
+                    </div>
+                    <div className="text-[13px] font-semibold text-white/85 mb-2 leading-snug group-hover:text-white transition-colors">{pkg.role}</div>
+                    <div className="text-[12px] text-white/30 leading-relaxed group-hover:text-white/45 transition-colors">{pkg.desc}</div>
                   </motion.div>
                 ))}
               </div>
