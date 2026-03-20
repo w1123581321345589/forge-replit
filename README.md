@@ -1,23 +1,24 @@
 # Forge
 
-**The agent-first code factory.**
+**Multi-agent orchestration infrastructure with behavioral verification.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![Built with Bun](https://img.shields.io/badge/Built%20with-Bun-orange)](https://bun.sh)
 [![v0.1.0](https://img.shields.io/badge/version-0.1.0-green)](CHANGELOG.md)
-[![CI](https://github.com/willrose/forge/actions/workflows/ci.yml/badge.svg)](https://github.com/willrose/forge/actions/workflows/ci.yml)
+[![CI](https://github.com/w1123581321345589/forge-replit/actions/workflows/ci.yml/badge.svg)](https://github.com/w1123581321345589/forge-replit/actions/workflows/ci.yml)
 
 ---
 
-Every current coding tool makes the same mistake: git is infrastructure, files are the atomic unit, line diffs are the change primitive. These were designed for humans reading code. When agents write and read code, optimizing for human readability is waste.
+Multi-agent orchestration is becoming core infrastructure. The teams building right now aren't just early — they're laying the rails the entire industry will run on.
 
-**Forge inverts this.** Intent is the primary artifact. Code is compiled from it.
+The open question isn't whether agents can coordinate. They can. The question is: **how do you know the coordination produced the right outcome?**
 
-You write behavioral claims. Agents implement, verify, and deploy against them. Where agents need human judgment, a chief-of-staff agent surfaces exactly one ask — twice a day. And when a deployed claim fails in production, the system cascades `needs_reverification` through every dependent claim automatically.
+Forge answers that. Every task an agent completes is a behavioral claim — a testable assertion about how the system behaves. Forge implements it, verifies it, deploys it, and watches it in production. When it breaks, the failure cascades through every dependent claim automatically. Agents get smarter with every task through a shared domain knowledge layer that persists across sessions and companies.
 
-The loop closes.
+The moat isn't the fastest agents. It's the ones that know when they're wrong.
 
 ---
+
 
 ## How it works
 
@@ -104,7 +105,7 @@ apps/ui/            React: intent map, CoS inbox, gap tracker, diff, activity, p
 **Prerequisites:** [Bun v1.0+](https://bun.sh), Docker
 
 ```bash
-git clone https://github.com/willrose/forge
+git clone https://github.com/w1123581321345589/forge-replit
 cd forge
 cp .env.example .env        # add ANTHROPIC_API_KEY
 make setup                  # Postgres + pgvector + migrations
@@ -158,13 +159,27 @@ The API serves the built UI directly. Everything on port 3000. The scheduler run
 
 ---
 
-## Why not gstack / Cursor / Devin?
+## Why not gstack / Cursor / Devin / Polsia?
 
-They're right about role separation. Wrong about the primitive.
+Every existing tool solves agent coordination. None of them solve behavioral correctness.
 
-Every tool that wraps agents around git hits the same ceiling: merge conflicts are still text diffs, PR reviews are still humans reading code, CI failures are still "test_auth_login failed" — not "the auth claim is violated." And none of them follow the claim into production.
+gstack adds specialist personas to Claude Code. Cursor adds AI to your editor. Devin runs agents autonomously. Polsia spins up entire AI companies. All of them measure success by completion — did the agent finish the task?
 
-Forge makes behavioral claims the source of truth across the entire lifecycle. When a root claim changes in development, dependents cascade to `needs_reverification`. When a deployed claim fails in production, the same cascade fires. The intent graph is the single artifact that spans spec, implementation, verification, and production monitoring. That's the inversion. Everything else follows from it.
+Forge measures success by verification — did the agent produce the right outcome?
+
+The distinction matters at scale. Polsia has 3,774 AI-built companies. The top earner makes $50 a month. The AI is extraordinarily good at building. It is not yet good at building the right thing — because there's no behavioral feedback loop. Code ships, nothing watches whether it satisfies the claim that motivated it, and the loop never closes.
+
+Forge is the correctness layer underneath orchestration:
+
+- Every task becomes a behavioral unit with acceptance criteria
+- A CEO reviewer asks "is this the 10-star version?" before compilation
+- A paranoid reviewer finds race conditions and trust boundary violations before verification
+- A verifier checks behavioral claims, not just test passage
+- Production probes watch deployed claims against live traffic
+- Domain annotations persist what agents learn across sessions and across companies
+- Failures cascade through the dependency graph automatically
+
+The teams building multi-agent orchestration infrastructure right now are laying the rails the industry runs on. The teams adding behavioral verification on top of that are the ones building the moat.
 
 ---
 
