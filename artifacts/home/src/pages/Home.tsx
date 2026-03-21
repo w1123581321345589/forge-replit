@@ -531,7 +531,7 @@ export default function Home() {
             {[
               { value: 341, suffix: "", label: "Lines from spec to shipping" },
               { value: 4, suffix: " min", label: "Average pipeline runtime" },
-              { value: 290, suffix: "", label: "Tests across 12 packages" },
+              { value: 343, suffix: "", label: "Tests across 14 packages" },
               { value: 13, suffix: "", label: "MCP tools for Claude Code" },
             ].map((stat, i) => (
               <motion.div variants={fadeUp} key={i} className="flex flex-col px-8 py-10 first:pl-0 group">
@@ -687,7 +687,7 @@ export default function Home() {
                 Packages
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 leading-tight">
-                Nine packages. One loop.
+                Ten packages. One loop.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/40 text-lg font-light mb-12 max-w-xl leading-relaxed">
                 The intent graph is the source of truth. Every package reads from it. Nothing drifts.
@@ -703,7 +703,8 @@ export default function Home() {
                   { name: "@forge/events", short: "events", role: "Every action, fully audited", desc: "Hard blocks on auth, billing, deploy. Soft blocks on deletes. Security is structural — enforced at the action-log boundary before execution, not at the prompt.", highlight: false, isNew: false },
                   { name: "@forge/db", short: "db", role: "Semantic memory over every claim", desc: "Postgres + pgvector. 1536-dim embeddings. Cosine similarity search finds conflicting claims before they compile — the spec-compiler's conflict detector runs over this.", highlight: false, isNew: false },
                   { name: "@forge/cli", short: "cli", role: "The full pipeline in one binary", desc: "forge spec · status · digest · gaps · diff · probe · watch · portfolio. Every lifecycle command. Works standalone or as a CoS-dispatched tool.", highlight: false, isNew: false },
-                  { name: "@forge/mcp", short: "mcp", role: "Claude Code's native Forge interface", desc: "13 MCP tools. forge_compile_spec, forge_dispatch, forge_get_portfolio, forge_propagate_annotation. The Command Center dispatches across all workspaces. No dashboard needed.", highlight: true, isNew: true },
+                  { name: "@forge/mcp", short: "mcp", role: "Claude Code's native Forge interface", desc: "13 MCP tools. forge_compile_spec, forge_dispatch, forge_get_portfolio, forge_propagate_annotation. The Command Center dispatches across all workspaces. No dashboard needed.", highlight: true, isNew: false },
+                  { name: "@forge/daemon", short: "daemon", role: "The system that operates itself", desc: "Five autonomous systems: self-healing watchdog · federated intelligence (ε-differential privacy) · RL reward gaming guard · T34 feed tamper detection · T35 personal surface boundary. Runs every 5 minutes. Flags `waiting_human` only when it can't self-resolve.", highlight: true, isNew: true, colSpan: true },
                 ].map((pkg) => (
                   <motion.div
                     variants={fadeUp}
@@ -712,7 +713,7 @@ export default function Home() {
                       pkg.highlight
                         ? "border-[#00D4FF]/25 hover:border-[#00D4FF]/50"
                         : "border-white/[0.06] hover:border-white/[0.14]"
-                    }`}
+                    } ${'colSpan' in pkg && pkg.colSpan ? "sm:col-span-2 lg:col-span-3" : ""}`}
                     style={{
                       background: pkg.highlight
                         ? "linear-gradient(145deg, rgba(0,212,255,0.06) 0%, rgba(0,212,255,0.02) 100%)"
@@ -777,7 +778,7 @@ export default function Home() {
                 The loop that<br />never closes —<br />until now.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/35 text-lg font-light mb-12 max-w-lg leading-relaxed">
-                MIT licensed. 290 tests. Claude Code native. Intent is the artifact — and it's open source.
+                MIT licensed. 343 tests. Claude Code native. Intent is the artifact — and it's open source.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3">
                 <a
