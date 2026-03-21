@@ -531,7 +531,7 @@ export default function Home() {
             {[
               { value: 341, suffix: "", label: "Lines from spec to shipping" },
               { value: 4, suffix: " min", label: "Average pipeline runtime" },
-              { value: 343, suffix: "", label: "Tests across 14 packages" },
+              { value: 374, suffix: "", label: "Tests across 14 packages" },
               { value: 13, suffix: "", label: "MCP tools for Claude Code" },
             ].map((stat, i) => (
               <motion.div variants={fadeUp} key={i} className="flex flex-col px-8 py-10 first:pl-0 group">
@@ -778,7 +778,7 @@ export default function Home() {
                 The loop that<br />never closes —<br />until now.
               </motion.h2>
               <motion.p variants={fadeUp} className="text-white/35 text-lg font-light mb-12 max-w-lg leading-relaxed">
-                MIT licensed. 343 tests. Claude Code native. Intent is the artifact — and it's open source.
+                MIT licensed. 374 tests. Claude Code native. Intent is the artifact — and it's open source.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-3">
                 <a
