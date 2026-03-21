@@ -21,7 +21,7 @@ export function Footer() {
           <span className="text-white/[0.06]">·</span>
           <span>v0.1.0</span>
           <span className="text-white/[0.06]">·</span>
-          <span>343 tests passing</span>
+          <span>374 tests passing</span>
         </div>
 
         <a
