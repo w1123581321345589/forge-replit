@@ -1,0 +1,13 @@
+{
+  "name": "@forge/daemon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@forge/db": "workspace:*",
+    "@forge/types": "workspace:*",
+    "@forge/intent-graph": "workspace:*",
+    "uuid": "^11.1.0"
+  }
+}
