@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.1 — 2026-03-21
+
+**374 passing. 0 failures. 14 packages. 10 migrations. 127 files. 423KB.**
+
+### New: `@forge/company` — company operations with three anti-injection systems
+
+**Scheduled jobs** (`scheduled_jobs` table) — replaces all hardcoded `if(isWednesday)` scheduler logic with a database-driven dispatch loop. The scheduler calls `dispatchDueJobs()` every 5 minutes, reads `v_due_jobs`, executes whatever is due. Eight default jobs seeded per workspace. `POST /api/jobs` lets the Command Center create schedules at runtime. `forge schedule --list / --dispatch / --enable / --disable` CLI commands.
+
+**Prompt templates** (`agent_prompt_templates` + `prompt_sync_log`) — 6 agent roles × 3 Claude model variants = 18 (role, model) pairs, each with system + output_format templates. Canonical templates live in code. Per-model variants stored in DB and rewritten nightly by `syncAllPromptTemplates()` using Claude Haiku. `recordTemplatePerformance()` tracks first-pass rates per variant. Higher-performing variants get promoted automatically.
+
+**Context budget enforcement** (`domain_threads` + `context_budget_log`) — `ImplementerAgent` no longer calls `getAnnotationsForDomain()` directly. It calls `getBudgetedAnnotations()`, which sorts by confidence × usage × recency, applies a per-domain token budget (security: 1500 tokens, operations: 3000 tokens), and returns only what fits. Federation context gets its own budget on top. `GET /api/context/health` shows utilization per domain. "Context rot is not a window size problem. It's a garbage problem."
+
+### Migration 010
+
+`010_scheduled_jobs_prompts_threads.sql` — scheduled_jobs table with cron expressions, agent_prompt_templates with per-model variants, domain_threads with token budgets and annotation sort config.
+
+---
+
 ## v0.2.0 — 2026-03-21
 
 **343 passing. 0 failures. 14 packages. 9 migrations. 122 files. 403KB.**
