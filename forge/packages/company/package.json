@@ -1,0 +1,19 @@
+{
+  "name": "@forge/company",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "bun test test/",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "uuid": "^11.1.0",
+    "@forge/db": "workspace:*",
+    "@forge/types": "workspace:*",
+    "@forge/intent-graph": "workspace:*",
+    "@forge/agents": "workspace:*"
+  }
+}
