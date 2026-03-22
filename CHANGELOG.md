@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.2 — 2026-03-22
+
+**404 passing. 0 failures. 14 packages. 11 migrations. 131 files. 439KB.**
+
+### New: agent session persistence
+
+**The OpenClaw insight:** a 2-hour default idle timeout makes agents feel forgetful. Most users never find the setting. The default IS the product.
+
+**`sessions.ts`** — full session lifecycle. `startOrResumeSession()` checks for an active session for the current (domain, role, workspace) before creating a new one. If one exists, it resumes with prior context. `formatSessionContextForPrompt()` builds the "## Session context" section injected into every implementation prompt — after domain annotations, after federation context, right before the task. Default idle threshold: 4 days (5,760 minutes), not 2 hours.
+
+**Session-aware implementer** — at the start of every `ImplementerAgent.execute()`: start or resume session, load context items, format them, inject into every variant prompt. At successful completion: increment `tasks_completed`, update session summary, mark idle. The agent remembers what it tried last time across separate invocations.
+
+**`runSessionExpiryCheck()`** — hourly job. Hard-expires sessions past threshold, generates handoff notes, promotes qualifying context items to formal annotations, graveyards partial-work sessions (tasks_completed=0 but context exists) as idea graveyard entries with revival conditions. Sessions expiring within 2 hours surface in the CoS inbox.
+
+**`forge sessions`** — `--list` (active sessions with hours until expiry), `--expiring` (urgent ones), `--extend <id>` (+4 days), `--close <id>` (generate handoff and close), `--check` (run expiry check immediately).
+
+### Migration 011
+
+`011_agent_sessions.sql` — `agent_sessions` (state machine with computed `expires_at`), `session_context_items` (typed informal learnings: attempted, human_said, discovered, blocked_on, next_step, learned), `session_handoffs` (what the next session inherits), `session_expiry_log` (audit trail).
+
+---
+
 ## v0.2.1 — 2026-03-21
 
 **374 passing. 0 failures. 14 packages. 10 migrations. 127 files. 423KB.**
