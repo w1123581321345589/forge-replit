@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![Built with Bun](https://img.shields.io/badge/Built%20with-Bun-orange)](https://bun.sh)
 [![v0.1.0](https://img.shields.io/badge/version-0.1.0-green)](CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-374%20passing-22c55e)](https://github.com/w1123581321345589/forge-replit)
+[![Tests](https://img.shields.io/badge/tests-404%20passing-22c55e)](https://github.com/w1123581321345589/forge-replit)
 [![CI](https://github.com/w1123581321345589/forge-replit/actions/workflows/ci.yml/badge.svg)](https://github.com/w1123581321345589/forge-replit/actions/workflows/ci.yml)
 
 ---
